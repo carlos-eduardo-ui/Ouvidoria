@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ouvidoria Municipal — Fortaleza</title>
+  <title>OuvidoriaDW</title>
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -24,7 +24,7 @@
   <!-- ═══════════════════════════ TOPBAR ═══════════════════════════ -->
   <div class="topbar">
     <div class="container d-flex justify-content-between align-items-center">
-      <span><i class="fa-solid fa-clock-rotate-left me-1"></i> Seg–Sex: 08h–18h &nbsp;|&nbsp; <i class="fa-solid fa-phone me-1"></i> 156</span>
+      <span><i class="fa-solid fa-clock-rotate-left me-1"></i> Seg–Sex: 07h–16:40h &nbsp;|&nbsp; <i class="fa-solid fa-phone me-1"></i> 156</span>
       <span>
         <a href="#" class="topbar-link"><i class="fa-brands fa-facebook-f"></i></a>
         <a href="#" class="topbar-link"><i class="fa-brands fa-instagram"></i></a>
@@ -37,10 +37,10 @@
   <nav class="navbar navbar-expand-lg sticky-top" id="mainNav">
     <div class="container">
       <a class="navbar-brand d-flex align-items-center gap-3" href="#">
-        <div class="brand-icon"><i class="fa-solid fa-scale-balanced"></i></div>
+        <div class="brand-icon"><img class="imgLogo" src="assets/img/logo2.png" alt="logo"></div>
         <div>
-          <div class="brand-name">Ouvidoria</div>
-          <div class="brand-sub">Prefeitura Municipal</div>
+          <div class="brand-name">OuvidoriaDW</div>
+          <div class="brand-sub">EEEP Dom Walfrido Texeira Vieira</div>
         </div>
       </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -74,9 +74,9 @@
       <div class="row align-items-center min-vh-hero">
         <div class="col-lg-7 hero-content">
           <div class="hero-badge"><i class="fa-solid fa-shield-halved me-2"></i>Transparência & Cidadania</div>
-          <h1 class="hero-title">Sua voz <em>transforma</em><br/>a cidade.</h1>
+          <h1 class="hero-title">Sua voz <em>transforma</em><br/>a escola.</h1>
           <p class="hero-desc">
-            A Ouvidoria Municipal é o canal oficial para você registrar denúncias, reclamações, sugestões e elogios. Garantimos sigilo, imparcialidade e resposta em até <strong>30 dias úteis</strong>.
+            A OuvidoriaDW é o canal oficial para você registrar denúncias, reclamações, sugestões e elogios. Garantimos sigilo, imparcialidade e resposta em até <strong>30 dias úteis</strong>.
           </p>
           <div class="hero-actions d-flex flex-wrap gap-3">
             <a href="#manifestacao" class="btn btn-hero-primary">
@@ -153,7 +153,7 @@
           <div class="section-label">Quem somos</div>
           <h2 class="section-title">Uma instituição a serviço<br/>do bem-estar coletivo.</h2>
           <p class="section-text">
-            A Ouvidoria Municipal atua como mediadora entre o cidadão e os órgãos públicos, assegurando que toda manifestação seja tratada com seriedade, confidencialidade e dentro dos prazos legais estabelecidos pela <strong>Lei nº 13.460/2017</strong>.
+            A OuvidoriaDW atua como mediadora entre os professores e alunos, assegurando que toda manifestação seja tratada com seriedade, confidencialidade e dentro dos prazos legais estabelecidos pela <strong>Lei nº 13.460/2017</strong>.
           </p>
           <div class="principios">
             <div class="principio-item"><i class="fa-solid fa-lock"></i> <span><strong>Sigilo</strong> — Suas informações são protegidas e nunca serão divulgadas sem autorização.</span></div>
@@ -178,7 +178,7 @@
           <div class="service-card service-denuncia">
             <div class="service-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
             <h4>Denúncia</h4>
-            <p>Irregularidades, corrupção ou má conduta de agentes públicos com ou sem identificação.</p>
+            <p>Irregularidades, corrupção ou má conduta de professores e alunos com ou sem identificação.</p>
             <a href="#manifestacao" class="service-link" data-tipo="Denúncia">Registrar <i class="fa-solid fa-arrow-right ms-1"></i></a>
           </div>
         </div>
@@ -194,7 +194,7 @@
           <div class="service-card service-sugestao">
             <div class="service-icon"><i class="fa-solid fa-lightbulb"></i></div>
             <h4>Sugestão</h4>
-            <p>Ideias para melhorar serviços públicos, políticas urbanas ou iniciativas municipais.</p>
+            <p>Ideias para melhorar a escola, aulas ou aprendizados.</p>
             <a href="#manifestacao" class="service-link" data-tipo="Sugestão">Registrar <i class="fa-solid fa-arrow-right ms-1"></i></a>
           </div>
         </div>
@@ -202,7 +202,7 @@
           <div class="service-card service-elogio">
             <div class="service-icon"><i class="fa-solid fa-star"></i></div>
             <h4>Elogio</h4>
-            <p>Reconheça um servidor ou equipe que prestou um atendimento exemplar ao cidadão.</p>
+            <p>Reconheça um servidor ou equipe que prestou um atendimento exemplar ao aluno.</p>
             <a href="#manifestacao" class="service-link" data-tipo="Elogio">Registrar <i class="fa-solid fa-arrow-right ms-1"></i></a>
           </div>
         </div>
@@ -278,11 +278,26 @@
                       <input type="email" class="form-control custom-input" id="email" placeholder="seu@email.com.br" />
                     </div>
                   </div>
+                  <!-- Mudando telefone para turma -->
                   <div class="col-md-6 identificado-field">
-                    <label class="form-label">Telefone</label>
+                    <label class="form-label">Turma <span class="req">*</span></label>
                     <div class="input-icon-group">
-                      <i class="fa-solid fa-phone"></i>
-                      <input type="tel" class="form-control custom-input" id="telefone" placeholder="(85) 9 0000-0000" maxlength="15" />
+                      <i class="fa-solid fa-graduation-cap"></i>
+                      <select name="turma" class="form-control custom-input" id="turma">
+                        <option value="turma">Turma</option>
+                        <option value="1° Informática">1° Informática</option>
+                        <option value="1° Enfermagem">1° Enfermagem</option>
+                        <option value="1° Saúde Bocal">1° Saúde Bocal</option>
+                        <option value="1° Energias">1° Energias</option>
+                        <option value="2° Informática">2° Informática</option>
+                        <option value="2° Enfermagem">2° Enfermagem</option>
+                        <option value="2° Saúde Bocal">2° Saúde Bocal</option>
+                        <option value="2° Energias">2° Energias</option>
+                        <option value="3° Informática">3° Informática</option>
+                        <option value="3° Enfermagem">3° Enfermagem</option>
+                        <option value="3° Saúde Bocal">3° Saúde Bocal</option>
+                        <option value="3° Energias">3° Energias</option>
+                      </select>
                     </div>
                   </div>
                   <div class="col-12 d-flex justify-content-end mt-2">
@@ -315,14 +330,15 @@
                     <div class="input-icon-group">
                       <i class="fa-solid fa-building-columns"></i>
                       <select class="form-select custom-input" id="orgao">
-                        <option value="">Selecione o órgão...</option>
-                        <option>Secretaria de Saúde</option>
-                        <option>Secretaria de Educação</option>
-                        <option>Secretaria de Infraestrutura</option>
-                        <option>Secretaria de Segurança</option>
-                        <option>Secretaria de Meio Ambiente</option>
-                        <option>Secretaria de Finanças</option>
-                        <option>Outros</option>
+                        <option value="">Selecione sobre quem deseja falar...</option>
+                        <option value="Professores">Professores</option>
+                        <option value="Secretaria">Secretaria / Documentos</option>
+                        <option value="Coordenação">Coordenação / Direção</option>
+                        <option value="Cantina">Cantina / Refeitório</option>
+                        <option value="Biblioteca">Biblioteca</option>
+                        <option value="Limpeza">Limpeza / Manutenção</option>
+                        <option value="Portaria">Portaria / Segurança</option>
+                        <option value="Outros">Outros</option>
                       </select>
                     </div>
                   </div>
@@ -339,11 +355,6 @@
                     <div class="char-counter"><span id="charCount">0</span>/1000 caracteres</div>
                   </div>
                   <div class="col-md-6">
-                    <label class="form-label">Endereço do fato</label>
-                    <div class="input-icon-group">
-                      <i class="fa-solid fa-location-dot"></i>
-                      <input type="text" class="form-control custom-input" id="endereco" placeholder="Rua, bairro ou CEP" />
-                    </div>
                   </div>
                   <div class="col-md-6">
                     <label class="form-label">Data do ocorrido</label>
@@ -561,8 +572,8 @@
           <ul class="footer-contact">
             <li><i class="fa-solid fa-phone"></i> 156 (gratuito)</li>
             <li><i class="fa-solid fa-envelope"></i> ouvidoria@prefeitura.gov.br</li>
-            <li><i class="fa-solid fa-location-dot"></i> Av. da Universidade, 100 — Centro</li>
-            <li><i class="fa-solid fa-clock"></i> Seg–Sex: 08h às 18h</li>
+            <li><i class="fa-solid fa-location-dot"></i>Av. Dr. Paulo de Almeida Sanford - Sobral - CE, 62040-270</li>
+            <li><i class="fa-solid fa-clock"></i> Seg–Sex: 07h às 16:40h</li>
           </ul>
         </div>
       </div>
