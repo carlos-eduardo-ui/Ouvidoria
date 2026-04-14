@@ -531,6 +531,118 @@ select.custom-input { appearance: none; cursor: pointer; }
 /* Anonymous toggle */
 .form-check-input:checked { background-color: var(--navy); border-color: var(--navy); }
 
+/* ── Step 1 — Cards de identificação ────────────────────────────── */
+.step1-choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: .5rem;
+}
+.step1-choice-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: .4rem;
+  padding: 1.8rem 1.2rem;
+  border-radius: var(--border-r);
+  border: 2px solid var(--gray-300);
+  background: var(--white);
+  cursor: pointer;
+  transition: all var(--transition);
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text-main);
+  text-decoration: none;
+}
+.step1-choice-btn strong {
+  font-size: .95rem;
+  font-weight: 700;
+  display: block;
+}
+.step1-choice-btn span {
+  font-size: .8rem;
+  color: var(--text-muted);
+  display: block;
+}
+.step1-choice-btn i {
+  color: var(--gray-500);
+  transition: color var(--transition);
+}
+.step1-identified {
+  border-color: var(--navy);
+  background: rgba(13,31,60,.03);
+}
+.step1-identified i { color: var(--navy); }
+.step1-identified:hover {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: var(--white);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+.step1-identified:hover i,
+.step1-identified:hover span { color: rgba(255,255,255,.75); }
+.step1-identified:hover strong { color: var(--white); }
+
+.step1-anon { border-color: var(--gray-300); }
+.step1-anon i { color: var(--gray-500); }
+.step1-anon:hover {
+  border-color: var(--gold);
+  background: var(--gold-pale);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+.step1-anon:hover i { color: var(--gold); }
+
+/* Card de usuário logado */
+.step1-user-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.2rem;
+  background: rgba(13,31,60,.03);
+  border: 1.5px solid var(--navy);
+  border-radius: var(--border-r);
+}
+.step1-user-avatar {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: var(--navy);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gold);
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+.step1-user-info { flex: 1; min-width: 0; }
+.step1-user-name {
+  font-weight: 700;
+  font-size: .95rem;
+  color: var(--navy);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.step1-user-meta {
+  font-size: .82rem;
+  color: var(--text-muted);
+}
+.step1-user-badge {
+  font-size: .75rem;
+  font-weight: 700;
+  color: var(--success);
+  background: rgba(46,125,82,.1);
+  padding: .3rem .75rem;
+  border-radius: 50px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+  .step1-choices { grid-template-columns: 1fr; }
+  .step1-user-card { flex-wrap: wrap; }
+}
+
 /* Buttons */
 .btn-step-next {
   background: var(--navy);
