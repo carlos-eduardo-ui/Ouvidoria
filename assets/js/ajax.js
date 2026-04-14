@@ -1,277 +1,162 @@
 /**
- * ajax.js — Camada de comunicação AJAX (jQuery)
- * Ouvidoria Municipal
+ * ajax.js — Camada de comunicação AJAX
+ * Ouvidoria Escolar — Grêmio Estudantil — EEEP Dom Walfrido
  *
- * Simula requisições ao servidor com delay realístico.
- * Para integração real, substitua os métodos _mockXxx
- * pelos endpoints da API REST correspondentes.
- *
- * Endpoints esperados (REST):
- *   POST   /api/manifestacoes          → registrar manifestação
- *   GET    /api/manifestacoes/:numero  → consultar protocolo
- *   POST   /api/manifestacoes/upload   → upload de anexos
+ * Conecta o formulário (form.js) aos endpoints PHP reais.
+ * Todos os caminhos são relativos — funciona em qualquer subpasta.
  */
 
-const Ajax = (() => {
-
-  /* ── Config da API ──────────────────────
-   * Em produção, defina a baseURL real e
-   * adicione headers de autenticação/CSRF.
-  ───────────────────────────────────────── */
-  const API = {
-    baseURL: '/api',          // Altere para URL real em produção
-    timeout: 15000,
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Requested-With': 'XMLHttpRequest',
-      // 'Authorization': 'Bearer <token>',
-      // 'X-CSRF-Token':  '<token>',
-    },
-  };
-
-  /* ── Utilitário interno de requisição ── */
-  function _request(method, endpoint, data = null) {
-    const options = {
-      method,
-      url: API.baseURL + endpoint,
-      timeout: API.timeout,
-      headers: API.headers,
-      contentType: 'application/json',
-    };
-    if (data) options.data = JSON.stringify(data);
-    return $.ajax(options);
-  }
-
-  /* ─────────────────────────────────────────────────────────────
-     REGISTRAR MANIFESTAÇÃO
-     POST /api/manifestacoes
-  ───────────────────────────────────────────────────────────── */
-  function submitManifestacao(payload) {
-    /* --- Produção: descomentar abaixo ---
-    return _request('POST', '/manifestacoes', payload)
-      .then(res => res)
-      .catch(err => { throw err; });
-    */
-
-    /* --- Mock (simulação) --- */
-    return _mockSubmit(payload);
-  }
-
-  function _mockSubmit(payload) {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        // Simular falha ocasional (5% de chance) para teste
-        if (Math.random() < 0.05) {
-          reject({ status: 500, responseJSON: { message: 'Erro interno do servidor.' } });
-          return;
-        }
-        resolve({
-          success: true,
-          protocolo: Utils.generateProtocol(),
-          mensagem: 'Manifestação registrada com sucesso.',
-          dataRegistro: Utils.nowBR(),
-          prazoResposta: '30 dias úteis',
-        });
-      }, 1800);
-    });
-  }
-
-  /* ─────────────────────────────────────────────────────────────
-     CONSULTAR PROTOCOLO
-     GET /api/manifestacoes/:numero
-  ───────────────────────────────────────────────────────────── */
-  function consultarProtocolo(numero) {
-    /* --- Produção: descomentar abaixo ---
-    return _request('GET', `/manifestacoes/${encodeURIComponent(numero)}`)
-      .then(res => res)
-      .catch(err => { throw err; });
-    */
-
-    /* --- Mock --- */
-    return _mockConsulta(numero);
-  }
-
-  function _mockConsulta(numero) {
-    const MOCK_DB = {
-      'OUV-2024-08741': {
-        protocolo: 'OUV-2024-08741',
-        tipo: 'Reclamação',
-        orgao: 'Secretaria de Infraestrutura',
-        assunto: 'Buraco em via pública — Av. Santos Dumont',
-        status: 'Respondido',
-        dataAbertura: '12/03/2024',
-        dataResposta: '20/03/2024',
-        timeline: [
-          { label: 'Registro recebido',       status: 'done',    data: '12/03/2024' },
-          { label: 'Em análise pelo órgão',   status: 'done',    data: '14/03/2024' },
-          { label: 'Resposta elaborada',       status: 'done',    data: '19/03/2024' },
-          { label: 'Respondido ao cidadão',    status: 'done',    data: '20/03/2024' },
-          { label: 'Encerrado',                status: 'pending', data: null         },
-        ],
-        resposta: 'O buraco foi identificado e a equipe de tapa-buracos realizará o reparo em até 5 dias úteis.',
-      },
-      'OUV-2024-09102': {
-        protocolo: 'OUV-2024-09102',
-        tipo: 'Denúncia',
-        orgao: 'Secretaria de Saúde',
-        assunto: 'Falta de medicamentos na UBS Benfica',
-        status: 'Em análise',
-        dataAbertura: '25/03/2024',
-        dataResposta: null,
-        timeline: [
-          { label: 'Registro recebido',     status: 'done',    data: '25/03/2024' },
-          { label: 'Em análise pelo órgão', status: 'active',  data: 'Hoje' },
-          { label: 'Resposta elaborada',    status: 'pending', data: null },
-          { label: 'Respondido ao cidadão', status: 'pending', data: null },
-          { label: 'Encerrado',             status: 'pending', data: null },
-        ],
-        resposta: null,
-      },
-    };
-
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const numUpper = numero.trim().toUpperCase();
-        const entry = MOCK_DB[numUpper];
-        if (entry) {
-          resolve(entry);
-        } else {
-          reject({ status: 404, responseJSON: { message: 'Protocolo não encontrado. Verifique o número e tente novamente.' } });
-        }
-      }, 1200);
-    });
-  }
-
-  /* ─────────────────────────────────────────────────────────────
-     UPLOAD DE ARQUIVOS
-     POST /api/manifestacoes/upload  (multipart/form-data)
-  ───────────────────────────────────────────────────────────── */
-  function uploadArquivos(files, protocolo) {
-    /* --- Produção: descomentar abaixo ---
-    const formData = new FormData();
-    formData.append('protocolo', protocolo);
-    files.forEach(file => formData.append('arquivos', file));
-    return $.ajax({
-      method: 'POST',
-      url: API.baseURL + '/manifestacoes/upload',
-      data: formData,
-      processData: false,
-      contentType: false,
-      timeout: 30000,
-    });
-    */
-
-    /* --- Mock --- */
-    return new Promise(resolve => setTimeout(() => resolve({ success: true, arquivos: files.length }), 800));
-  }
-
-  /* ─────────────────────────────────────────────────────────────
-     HANDLER DE ERROS GLOBAL
-  ───────────────────────────────────────────────────────────── */
-  function handleError(err) {
-    if (err.status === 0) {
-      return 'Sem conexão com o servidor. Verifique sua internet.';
-    }
-    if (err.status === 404) {
-      return err.responseJSON?.message || 'Recurso não encontrado.';
-    }
-    if (err.status === 422) {
-      return err.responseJSON?.message || 'Dados inválidos. Revise o formulário.';
-    }
-    if (err.status === 429) {
-      return 'Muitas tentativas. Aguarde alguns minutos e tente novamente.';
-    }
-    return err.responseJSON?.message || 'Erro inesperado. Tente novamente mais tarde.';
-  }
-
-  /* ── Public API ─────────────────────────── */
-  return { submitManifestacao, consultarProtocolo, uploadArquivos, handleError };
-
-})();
-
-
-/* ═══════════════════════════════════════════════════════════
-   BINDINGS DE EVENTOS AJAX
-═══════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════
+   SUBMIT DA MANIFESTAÇÃO
+   Chamado pelo botão #submitBtn no step-3.
+   Envia os dados para api/manifestacoes.php e trata a resposta.
+══════════════════════════════════════════════════════════════════ */
 $(document).ready(() => {
 
-  /* ── Submit do formulário ──────────────── */
   $('#submitBtn').on('click', function () {
+
+    // 1. Checar checkbox de termos
     if (!$('#termos').is(':checked')) {
-      Utils.showToast('Você precisa aceitar os Termos e a Política de Privacidade.', 'warning');
+      Utils.showToast('Você precisa aceitar a Política de Privacidade para continuar.', 'warning');
       return;
     }
 
-    const $btn = $(this);
+    // 2. Pegar os dados do formulário via Form.getFormData()
     const payload = Form.getFormData();
 
-    // Loading state
+    // 3. Validação mínima client-side antes de enviar
+    if (!payload.IDtipo || !payload.IDsetor || !payload.manifest?.trim()) {
+      Utils.showToast('Dados incompletos. Volte e verifique os campos obrigatórios.', 'error');
+      return;
+    }
+
+    // 4. Estado de loading
+    const $btn = $(this);
     $btn.prop('disabled', true);
     $('#submitText').addClass('d-none');
     $('#submitSpinner').removeClass('d-none');
 
-    Ajax.submitManifestacao(payload)
-      .then(res => {
+    // 5. Chamada AJAX para o backend real
+    $.ajax({
+      method:      'POST',
+      url:         'api/manifestacoes.php',   // caminho relativo
+      contentType: 'application/json',
+      data:        JSON.stringify(payload),
+      timeout:     15000,
+      dataType:    'json',
+    })
+    .done(res => {
+      if (res.success && res.protocolo) {
+        // Sucesso — mostrar tela de protocolo
         Utils.showToast('Manifestação enviada com sucesso!', 'success');
         Form.goToSuccess(res.protocolo);
-      })
-      .catch(err => {
-        const msg = Ajax.handleError(err);
-        Utils.showToast(msg, 'error', 'Falha no envio');
-      })
-      .finally(() => {
-        $btn.prop('disabled', false);
-        $('#submitText').removeClass('d-none');
-        $('#submitSpinner').addClass('d-none');
-      });
+      } else {
+        // Backend retornou success=false com mensagem
+        Utils.showToast(res.message || 'Erro ao registrar. Tente novamente.', 'error');
+      }
+    })
+    .fail(xhr => {
+      const msg = _parseError(xhr);
+      Utils.showToast(msg, 'error', 'Falha no envio');
+    })
+    .always(() => {
+      $btn.prop('disabled', false);
+      $('#submitText').removeClass('d-none');
+      $('#submitSpinner').addClass('d-none');
+    });
+
   });
 
-  /* ── Consulta de protocolo ──────────────── */
+  /* ════════════════════════════════════════════════════════════════
+     CONSULTA DE PROTOCOLO
+     Chamado pelo botão #btnConsultar na seção de consulta.
+     Busca em api/consulta.php pelo número informado.
+  ════════════════════════════════════════════════════════════════ */
   $('#btnConsultar').on('click', function () {
-    const numero = $.trim($('#protocolSearch').val());
+    const numero = $.trim($('#protocolSearch').val()).toUpperCase();
+
     if (!numero) {
       Utils.showToast('Informe o número do protocolo.', 'warning');
       return;
     }
 
-    const $btn = $(this);
-    $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Buscando...');
+    // Validação básica do formato OUV-AAAA-NNNNN
+    if (!/^OUV-\d{4}-\d{5}$/.test(numero)) {
+      Utils.showToast('Formato inválido. Use o padrão OUV-2025-00042.', 'warning');
+      return;
+    }
 
-    Ajax.consultarProtocolo(numero)
-      .then(data => _renderConsultaSuccess(data))
-      .catch(err  => _renderConsultaError(Ajax.handleError(err)))
-      .finally(() => {
-        $btn.prop('disabled', false).html('<i class="fa-solid fa-search me-2"></i>Consultar');
-      });
+    const $btn = $(this);
+    $btn.prop('disabled', true)
+        .html('<span class="spinner-border spinner-border-sm me-2"></span>Buscando...');
+
+    $.ajax({
+      method:   'GET',
+      url:      'api/consulta.php',
+      data:     { protocolo: numero },
+      dataType: 'json',
+      timeout:  10000,
+    })
+    .done(data => {
+      if (data.success) {
+        _renderConsultaSuccess(data);
+      } else {
+        _renderConsultaError(data.message || 'Protocolo não encontrado.');
+      }
+    })
+    .fail(xhr => {
+      _renderConsultaError(_parseError(xhr));
+    })
+    .always(() => {
+      $btn.prop('disabled', false)
+          .html('<i class="fa-solid fa-search me-2"></i>Consultar');
+    });
   });
 
-  /* Tecla Enter no campo de consulta */
+  // Enter no campo de protocolo dispara a busca
   $('#protocolSearch').on('keydown', function (e) {
     if (e.key === 'Enter') $('#btnConsultar').trigger('click');
   });
 
-  /* ── Render resultado consulta ──────────── */
+  /* ════════════════════════════════════════════════════════════════
+     RENDER — Resultado da consulta com sucesso
+  ════════════════════════════════════════════════════════════════ */
   function _renderConsultaSuccess(data) {
-    const statusClass = {
-      'Aberto':      'status-aberto',
-      'Em análise':  'status-analise',
-      'Respondido':  'status-respondido',
-      'Encerrado':   'status-encerrado',
-    }[data.status] || 'status-analise';
+    // Mapa de status → classe CSS e ícone
+    const statusMap = {
+      'Aberta':      { cls: 'status-aberto',     icon: 'fa-circle-dot' },
+      'Em análise':  { cls: 'status-analise',    icon: 'fa-magnifying-glass' },
+      'Respondida':  { cls: 'status-respondido', icon: 'fa-circle-check' },
+      'Encerrada':   { cls: 'status-encerrado',  icon: 'fa-circle-xmark' },
+    };
+    const st = statusMap[data.status] || statusMap['Aberta'];
 
-    const timelineHtml = data.timeline.map(t => `
+    // Montar timeline
+    const etapas = [
+      { label: 'Manifestação recebida', done: true,                            data: data.criado_em },
+      { label: 'Em análise pelo Grêmio', done: data.status !== 'Aberta',       data: null },
+      { label: 'Respondida',             done: data.status === 'Respondida' || data.status === 'Encerrada', data: data.atualizado_em },
+      { label: 'Encerrada',              done: data.status === 'Encerrada',    data: null },
+    ];
+
+    const timelineHtml = etapas.map(e => `
       <div class="timeline-item">
-        <div class="timeline-dot dot-${t.status}"></div>
+        <div class="timeline-dot ${e.done ? 'dot-done' : 'dot-pending'}"></div>
         <div>
-          <strong>${Utils.sanitize(t.label)}</strong>
-          ${t.data ? `<span class="text-muted ms-2 small">${Utils.sanitize(t.data)}</span>` : ''}
+          <strong>${Utils.sanitize(e.label)}</strong>
+          ${e.data && e.done ? `<span class="text-muted ms-2 small">${Utils.sanitize(e.data)}</span>` : ''}
         </div>
       </div>`).join('');
 
-    const respostaHtml = data.resposta
-      ? `<div class="mt-3 p-3 rounded" style="background:rgba(46,125,82,.07); border-left:3px solid #2e7d52">
-           <strong style="font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:#2e7d52">Resposta da Ouvidoria</strong>
-           <p class="mb-0 mt-1" style="font-size:.9rem">${Utils.sanitize(data.resposta)}</p>
+    const respostaHtml = data.feedback
+      ? `<div class="mt-3 p-3 rounded"
+              style="background:rgba(0,122,66,.07);border-left:3px solid #007A42">
+           <strong style="font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:#007A42">
+             Resposta do Grêmio
+           </strong>
+           <p class="mb-0 mt-1" style="font-size:.9rem">
+             ${Utils.sanitize(data.feedback)}
+           </p>
          </div>`
       : '';
 
@@ -281,16 +166,27 @@ $(document).ready(() => {
           <div style="font-size:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Protocolo</div>
           <div style="font-size:1.1rem;font-weight:700;color:var(--navy)">${Utils.sanitize(data.protocolo)}</div>
         </div>
-        <span class="status-badge ${statusClass}">
-          <i class="fa-solid fa-circle fa-xs"></i> ${Utils.sanitize(data.status)}
+        <span class="status-badge ${st.cls}">
+          <i class="fa-solid ${st.icon} fa-xs me-1"></i>${Utils.sanitize(data.status)}
         </span>
       </div>
       <div class="row g-2 mb-3">
-        <div class="col-sm-6"><span style="font-size:.75rem;color:var(--text-muted)">Tipo</span><div style="font-weight:600">${Utils.sanitize(data.tipo)}</div></div>
-        <div class="col-sm-6"><span style="font-size:.75rem;color:var(--text-muted)">Órgão</span><div style="font-weight:600">${Utils.sanitize(data.orgao)}</div></div>
-        <div class="col-12"><span style="font-size:.75rem;color:var(--text-muted)">Assunto</span><div>${Utils.sanitize(data.assunto)}</div></div>
-        <div class="col-sm-6"><span style="font-size:.75rem;color:var(--text-muted)">Abertura</span><div>${Utils.sanitize(data.dataAbertura)}</div></div>
-        <div class="col-sm-6"><span style="font-size:.75rem;color:var(--text-muted)">Resposta</span><div>${data.dataResposta ? Utils.sanitize(data.dataResposta) : 'Aguardando'}</div></div>
+        <div class="col-sm-6">
+          <span style="font-size:.75rem;color:var(--text-muted)">Tipo</span>
+          <div style="font-weight:600">${Utils.sanitize(data.tipo ?? '—')}</div>
+        </div>
+        <div class="col-sm-6">
+          <span style="font-size:.75rem;color:var(--text-muted)">Setor</span>
+          <div style="font-weight:600">${Utils.sanitize(data.setor ?? '—')}</div>
+        </div>
+        <div class="col-sm-6">
+          <span style="font-size:.75rem;color:var(--text-muted)">Enviada em</span>
+          <div>${Utils.sanitize(data.criado_em ?? '—')}</div>
+        </div>
+        <div class="col-sm-6">
+          <span style="font-size:.75rem;color:var(--text-muted)">Atualizada em</span>
+          <div>${Utils.sanitize(data.atualizado_em ?? '—')}</div>
+        </div>
       </div>
       <div class="progress-timeline">${timelineHtml}</div>
       ${respostaHtml}`;
@@ -301,19 +197,41 @@ $(document).ready(() => {
       .html(html);
   }
 
+  /* ════════════════════════════════════════════════════════════════
+     RENDER — Resultado da consulta com erro
+  ════════════════════════════════════════════════════════════════ */
   function _renderConsultaError(message) {
-    const html = `
-      <div class="d-flex align-items-center gap-3">
-        <i class="fa-solid fa-circle-xmark fa-2x" style="color:var(--danger)"></i>
-        <div>
-          <strong>Protocolo não encontrado</strong>
-          <p class="mb-0 small text-muted">${Utils.sanitize(message)}</p>
-        </div>
-      </div>`;
     $('#consultaResult')
       .removeClass('d-none result-success')
       .addClass('result-error')
-      .html(html);
+      .html(`
+        <div class="d-flex align-items-center gap-3">
+          <i class="fa-solid fa-circle-xmark fa-2x" style="color:var(--danger)"></i>
+          <div>
+            <strong>Protocolo não encontrado</strong>
+            <p class="mb-0 small text-muted">${Utils.sanitize(message)}</p>
+          </div>
+        </div>`);
+  }
+
+  /* ════════════════════════════════════════════════════════════════
+     PARSER DE ERROS HTTP
+     Traduz os status HTTP em mensagens legíveis para o usuário.
+  ════════════════════════════════════════════════════════════════ */
+  function _parseError(xhr) {
+    // Tentar extrair mensagem do JSON de resposta
+    if (xhr.responseJSON?.message) return xhr.responseJSON.message;
+
+    // Fallback por código HTTP
+    switch (xhr.status) {
+      case 0:   return 'Sem conexão com o servidor. Verifique sua internet.';
+      case 404: return 'Endpoint não encontrado. Contate o suporte.';
+      case 405: return 'Método não permitido.';
+      case 422: return 'Dados inválidos. Revise o formulário.';
+      case 429: return 'Muitas tentativas. Aguarde alguns minutos.';
+      case 500: return 'Erro interno no servidor. Tente novamente mais tarde.';
+      default:  return `Erro inesperado (${xhr.status}). Tente novamente.`;
+    }
   }
 
 });
