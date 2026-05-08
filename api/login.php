@@ -24,8 +24,11 @@ header('Content-Type: application/json; charset=UTF-8');
 header('X-Content-Type-Options: nosniff');
 
 session_set_cookie_params([
-    'httponly' => true,   // JS não consegue ler o cookie
-    'samesite' => 'Strict', // cookie só vai no mesmo domínio
+    'lifetime' => 0,          // cookie some ao fechar o navegador
+    'path'     => '/',        // válido em todo o site
+    'secure'   => true,       // ✅ CORRIGIDO: só envia o cookie por HTTPS
+    'httponly' => true,        // JS não consegue ler o cookie (bloqueia XSS)
+    'samesite' => 'Strict',   // cookie só vai em requisições do mesmo domínio (bloqueia CSRF)
 ]);
 session_start();
 
@@ -66,10 +69,7 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     exit;
 }
 
-/* ── BLOCO 5: Buscar na tabela correta com colunas corretas ─────── */
-// CORREÇÃO: tabela era 'usuarios'    → agora 'tbusuarios'
-// CORREÇÃO: coluna era 'senha_hash'  → agora 'senha'
-// CORREÇÃO: chave era 'id'           → agora 'IDusu'
+/* ── BLOCO 5: Buscar o usuário no banco ─────────────────────────── */
 try {
     $pdo = Database::connect();
 
@@ -125,9 +125,6 @@ if (!password_verify($senha, $usuario['senha'])) {
 }
 
 /* ── BLOCO 8: Criar a sessão PHP ────────────────────────────────── */
-// CORREÇÃO CRÍTICA: era $_SESSION['usuario_id'] → agora $_SESSION['IDusu']
-// session.php lê exatamente 'IDusu' — chave errada = sessão nunca reconhecida
-
 session_regenerate_id(true); // bloqueia session fixation attack
 
 $_SESSION['IDusu']    = (int) $usuario['IDusu'];

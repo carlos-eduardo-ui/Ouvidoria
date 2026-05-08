@@ -25,10 +25,21 @@ header('Cache-Control: no-store, no-cache, must-revalidate');
 header('X-Content-Type-Options: nosniff');
 
 /* ── 2. Configuração segura do cookie de sessão ─────────────────────
+   lifetime  → 0 = cookie some ao fechar o navegador
+   path      → '/' = válido em todo o site
+   secure    → true em produção (HTTPS obrigatório), false em desenvolvimento
+               Controlado pela variável APP_ENV no arquivo .env:
+               APP_ENV=development  → secure=false (funciona em http://localhost)
+               APP_ENV=production   → secure=true  (só aceita HTTPS)
    httponly  → JavaScript não consegue ler o cookie (bloqueia XSS)
    samesite  → cookie só vai junto em requisições do mesmo site (bloqueia CSRF)
 ─────────────────────────────────────────────────────────────────── */
+$emProducao = ($_ENV['APP_ENV'] ?? getenv('APP_ENV') ?: 'production') !== 'development';
+
 session_set_cookie_params([
+    'lifetime' => 0,
+    'path'     => '/',
+    'secure'   => $emProducao,
     'httponly' => true,
     'samesite' => 'Strict',
 ]);
