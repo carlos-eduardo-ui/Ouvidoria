@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ouvidoria — Redefinir Senha</title>
+
+  <!-- Google Fonts (mesmo do login.html) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Bootstrap 5 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <!-- CSS de autenticação do projeto -->
+  <link rel="stylesheet" href="assets/css/auth.css" />
+</head>
+<body class="auth-body">
+
+  <div class="auth-split">
+
+    <!-- PAINEL ESQUERDO — igual ao login.html -->
+    <aside class="auth-panel-left">
+      <div class="panel-bg-shapes">
+        <div class="pshape pshape-sun"></div>
+        <div class="pshape pshape-wave1"></div>
+        <div class="pshape pshape-wave2"></div>
+      </div>
+      <div class="panel-content">
+        <div class="panel-logo">
+          <i class="fa-solid fa-bullhorn"></i>
+        </div>
+        <h1 class="panel-title">Ouvidoria<br>Escolar</h1>
+        <p class="panel-sub">Crie uma senha nova e segura para continuar acessando sua conta.</p>
+      </div>
+    </aside>
+
+    <!-- PAINEL DIREITO — formulário -->
+    <main class="auth-panel-right">
+      <div class="auth-form-wrap">
+
+        <!-- Estado: formulário (padrão) -->
+        <div id="viewForm">
+          <h2 class="auth-title">Criar nova senha</h2>
+          <p class="auth-subtitle mb-4">O link é válido por <strong>1 hora</strong>. Escolha uma senha com letras e números.</p>
+
+          <div id="alertBox" class="alert d-none" role="alert"></div>
+
+          <div class="mb-3">
+            <label for="senha" class="form-label">Nova senha</label>
+            <div class="input-group">
+              <input type="password" id="senha" class="form-control"
+                     placeholder="Mínimo 8 caracteres" autocomplete="new-password" />
+              <button class="btn btn-outline-secondary" type="button" id="btnVerSenha" title="Mostrar senha">
+                <i class="fa-solid fa-eye" id="iconeSenha"></i>
+              </button>
+            </div>
+            <div class="form-text">Use letras e números. Mínimo 8 caracteres.</div>
+          </div>
+
+          <div class="mb-4">
+            <label for="confirmar" class="form-label">Confirmar senha</label>
+            <input type="password" id="confirmar" class="form-control"
+                   placeholder="Repita a senha" autocomplete="new-password" />
+          </div>
+
+          <!-- Barra de força da senha -->
+          <div class="mb-4">
+            <div class="d-flex justify-content-between mb-1">
+              <small class="text-muted">Força da senha</small>
+              <small id="labelForca" class="text-muted">—</small>
+            </div>
+            <div class="progress" style="height:5px">
+              <div id="barraForca" class="progress-bar" role="progressbar" style="width:0%"></div>
+            </div>
+          </div>
+
+          <button id="btnSalvar" class="btn btn-primary w-100" onclick="salvarSenha()">
+            Salvar nova senha
+          </button>
+
+          <p class="text-center mt-3 mb-0">
+            <a href="login.html" class="auth-link">
+              <i class="fa-solid fa-arrow-left fa-xs me-1"></i>Voltar para o login
+            </a>
+          </p>
+        </div>
+
+        <!-- Estado: sucesso -->
+        <div id="viewSucesso" class="d-none text-center">
+          <div class="mb-4" style="font-size:3rem;color:var(--bs-success)">
+            <i class="fa-solid fa-circle-check"></i>
+          </div>
+          <h2 class="auth-title">Senha redefinida!</h2>
+          <p class="auth-subtitle">Sua nova senha foi salva com sucesso. Agora é só entrar.</p>
+          <a href="login.html" class="btn btn-primary mt-3 w-100">Ir para o login</a>
+        </div>
+
+        <!-- Estado: token inválido ou expirado -->
+        <div id="viewErroToken" class="d-none text-center">
+          <div class="mb-4" style="font-size:3rem;color:var(--bs-danger)">
+            <i class="fa-solid fa-circle-xmark"></i>
+          </div>
+          <h2 class="auth-title">Link inválido</h2>
+          <p class="auth-subtitle">Este link já foi usado ou expirou. Solicite um novo na tela de login.</p>
+          <a href="login.html" class="btn btn-outline-primary mt-3 w-100">Voltar para o login</a>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // ── Pega o token da URL ───────────────────────────────────
+    const params = new URLSearchParams(window.location.search);
+    const token  = params.get('token') || '';
+
+    // Se não vier nenhum token na URL, mostra o erro direto
+    if (!token || token.length !== 64) {
+      document.getElementById('viewForm').classList.add('d-none');
+      document.getElementById('viewErroToken').classList.remove('d-none');
+    }
+
+    // ── Mostrar / ocultar senha ───────────────────────────────
+    document.getElementById('btnVerSenha').addEventListener('click', () => {
+      const input  = document.getElementById('senha');
+      const icone  = document.getElementById('iconeSenha');
+      const visivel = input.type === 'text';
+      input.type = visivel ? 'password' : 'text';
+      icone.className = visivel ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash';
+    });
+
+    // ── Barra de força da senha ───────────────────────────────
+    document.getElementById('senha').addEventListener('input', function () {
+      const val    = this.value;
+      const barra  = document.getElementById('barraForca');
+      const label  = document.getElementById('labelForca');
+      let forca    = 0;
+
+      if (val.length >= 8)                      forca++;
+      if (/[A-Z]/.test(val))                    forca++;
+      if (/[0-9]/.test(val))                    forca++;
+      if (/[^a-zA-Z0-9]/.test(val))             forca++;
+
+      const niveis = [
+        { pct: 0,   cor: '',          txt: '—'      },
+        { pct: 25,  cor: 'bg-danger', txt: 'Fraca'  },
+        { pct: 50,  cor: 'bg-warning',txt: 'Média'  },
+        { pct: 75,  cor: 'bg-info',   txt: 'Boa'    },
+        { pct: 100, cor: 'bg-success',txt: 'Forte'  },
+      ];
+
+      const n = niveis[forca];
+      barra.style.width = n.pct + '%';
+      barra.className   = 'progress-bar ' + n.cor;
+      label.textContent = n.txt;
+    });
+
+    // ── Alerta inline ─────────────────────────────────────────
+    function mostrarAlerta(msg, tipo = 'danger') {
+      const box = document.getElementById('alertBox');
+      box.className = `alert alert-${tipo}`;
+      box.textContent = msg;
+      box.classList.remove('d-none');
+    }
+
+    function ocultarAlerta() {
+      document.getElementById('alertBox').classList.add('d-none');
+    }
+
+    // ── Envio do formulário ───────────────────────────────────
+    async function salvarSenha() {
+      ocultarAlerta();
+
+      const senha     = document.getElementById('senha').value;
+      const confirmar = document.getElementById('confirmar').value;
+      const btn       = document.getElementById('btnSalvar');
+
+      // Validações no front antes de bater na API
+      if (senha.length < 8) {
+        mostrarAlerta('A senha deve ter no mínimo 8 caracteres.');
+        return;
+      }
+      if (!/[a-zA-Z]/.test(senha) || !/[0-9]/.test(senha)) {
+        mostrarAlerta('A senha deve conter letras e números.');
+        return;
+      }
+      if (senha !== confirmar) {
+        mostrarAlerta('As senhas não coincidem.');
+        return;
+      }
+
+      btn.disabled     = true;
+      btn.innerHTML    = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Salvando...';
+
+      try {
+        const res  = await fetch('api/reset.php', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ token, senha }),
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          // Mostra tela de sucesso
+          document.getElementById('viewForm').classList.add('d-none');
+          document.getElementById('viewSucesso').classList.remove('d-none');
+        } else {
+          // Token expirado / inválido vindo da API
+          if (res.status === 422 && data.error?.includes('inválido')) {
+            document.getElementById('viewForm').classList.add('d-none');
+            document.getElementById('viewErroToken').classList.remove('d-none');
+          } else {
+            mostrarAlerta(data.error || 'Erro ao salvar a senha. Tente novamente.');
+          }
+        }
+      } catch (err) {
+        mostrarAlerta('Erro de conexão. Verifique sua internet e tente novamente.');
+      } finally {
+        btn.disabled  = false;
+        btn.innerHTML = 'Salvar nova senha';
+      }
+    }
+
+    // Permite submeter com Enter
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter') salvarSenha();
+    });
+  </script>
+
+</body>
+</html>
