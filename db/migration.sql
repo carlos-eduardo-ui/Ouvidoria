@@ -19,6 +19,23 @@
 CREATE DATABASE IF NOT EXISTS `dbouvidoria` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci */;
 USE `dbouvidoria`;
 
+-- Copiando estrutura para tabela dbouvidoria.log_acesso
+CREATE TABLE IF NOT EXISTS `log_acesso` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `usuario_id` int(11) unsigned DEFAULT NULL COMMENT 'NULL = ação anônima',
+  `acao` varchar(100) NOT NULL COMMENT 'Ex: manifestacao:42, login, logout',
+  `ip` varchar(45) DEFAULT NULL COMMENT 'IPv4 ou IPv6 do dispositivo',
+  `user_agent` varchar(255) DEFAULT NULL COMMENT 'Navegador e sistema operacional',
+  `criado_em` datetime NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `idx_usuario` (`usuario_id`),
+  KEY `idx_acao` (`acao`),
+  KEY `idx_criado` (`criado_em`),
+  CONSTRAINT `fk_log_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `tbusuarios` (`IDusu`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Auditoria de ações realizadas no sistema';
+
+-- Exportação de dados foi desmarcado.
+
 -- Copiando estrutura para tabela dbouvidoria.password_resets
 CREATE TABLE IF NOT EXISTS `password_resets` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -77,6 +94,22 @@ CREATE TABLE IF NOT EXISTS `tbmanifest` (
   CONSTRAINT `fk_manifest_tipo` FOREIGN KEY (`IDtipo`) REFERENCES `tipos` (`IDtipo`),
   CONSTRAINT `fk_manifest_usu` FOREIGN KEY (`IDusu`) REFERENCES `tbusuarios` (`IDusu`) ON DELETE SET NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Exportação de dados foi desmarcado.
+
+-- Copiando estrutura para tabela dbouvidoria.tbmanifest_arquivos
+CREATE TABLE IF NOT EXISTS `tbmanifest_arquivos` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `IDmanifest` int(11) unsigned NOT NULL COMMENT 'Manifestação à qual pertence',
+  `nome_original` varchar(255) NOT NULL COMMENT 'Nome original do arquivo (exibição)',
+  `nome_salvo` varchar(100) NOT NULL COMMENT 'Nome gerado aleatoriamente no servidor',
+  `mime_type` varchar(100) NOT NULL COMMENT 'Tipo real do arquivo (verificado por finfo)',
+  `tamanho` int(11) unsigned NOT NULL COMMENT 'Tamanho em bytes',
+  `criado_em` datetime NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `idx_manifest` (`IDmanifest`),
+  CONSTRAINT `fk_arquivo_manifest` FOREIGN KEY (`IDmanifest`) REFERENCES `tbmanifest` (`IDmanifest`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Arquivos anexados às manifestações';
 
 -- Exportação de dados foi desmarcado.
 
