@@ -478,7 +478,13 @@ const Form = (() => {
   }
 
   /* ── API pública ────────────────────────────────────────────── */
-  return { init, getFormData, goToSuccess };
+  /* ── Expõe os File objects reais para o ajax.js fazer o upload ──*/
+  function getUploadedFiles() {
+    return uploadedFiles.slice();
+  }
+
+  /* ── API pública ────────────────────────────────────────────── */
+  return { init, getFormData, getUploadedFiles, goToSuccess };
 
 })();
 

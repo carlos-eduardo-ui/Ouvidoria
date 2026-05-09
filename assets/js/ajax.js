@@ -47,9 +47,18 @@ $(document).ready(() => {
     })
     .done(res => {
       if (res.success && res.protocolo) {
-        // Sucesso — mostrar tela de protocolo
-        Utils.showToast('Manifestação enviada com sucesso!', 'success');
-        Form.goToSuccess(res.protocolo);
+        // Passo 2: se houver arquivos, envia para api/upload.php
+        const arquivos = Form.getUploadedFiles();
+        if (arquivos.length > 0) {
+          _enviarArquivos(res.IDmanifest, arquivos)
+            .finally(() => {
+              Utils.showToast('Manifestação enviada com sucesso!', 'success');
+              Form.goToSuccess(res.protocolo);
+            });
+        } else {
+          Utils.showToast('Manifestação enviada com sucesso!', 'success');
+          Form.goToSuccess(res.protocolo);
+        }
       } else {
         // Backend retornou success=false com mensagem
         Utils.showToast(res.message || 'Erro ao registrar. Tente novamente.', 'error');
@@ -112,6 +121,35 @@ $(document).ready(() => {
           .html('<i class="fa-solid fa-search me-2"></i>Consultar');
     });
   });
+
+
+  /* ════════════════════════════════════════════════════════════════
+     UPLOAD DE ARQUIVOS
+     Chamado após o submit bem-sucedido da manifestação.
+     Envia os arquivos para api/upload.php via FormData.
+  ════════════════════════════════════════════════════════════════ */
+  async function _enviarArquivos(IDmanifest, arquivos) {
+    const formData = new FormData();
+    formData.append('IDmanifest', IDmanifest);
+    arquivos.forEach(file => formData.append('arquivos[]', file));
+
+    try {
+      const res  = await fetch('api/upload.php', { method: 'POST', body: formData });
+      const data = await res.json();
+
+      if (data.erros && data.erros.length > 0) {
+        // Avisa sobre arquivos que não puderam ser salvos
+        Utils.showToast(
+          data.erros.length + ' arquivo(s) não puderam ser enviados.',
+          'warning'
+        );
+      }
+    } catch (err) {
+      // Upload falhou, mas a manifestação já foi registrada — avisa sem bloquear
+      Utils.showToast('Manifestação registrada, mas os anexos falharam.', 'warning');
+      console.warn('[upload] Erro:', err);
+    }
+  }
 
   // Enter no campo de protocolo dispara a busca
   $('#protocolSearch').on('keydown', function (e) {
