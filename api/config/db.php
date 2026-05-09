@@ -26,36 +26,35 @@ if (file_exists(__DIR__ . '/../../.env')) {
 class Database
 {
     private static ?PDO $instance = null;
- 
+
     public static function connect(): PDO
     {
         if (self::$instance === null) {
- 
-            $host   = $_ENV['DB_HOST']   ?? getenv('DB_HOST')   ?: '127.0.0.1';
-            $dbname = $_ENV['DB_NAME']   ?? getenv('DB_NAME')   ?: 'dbouvidoria';
-            $user   = $_ENV['DB_USER']   ?? getenv('DB_USER')   ?: null;
-            $pass   = $_ENV['DB_PASS']   ?? getenv('DB_PASS')   ?: null;
-            $port   = $_ENV['DB_PORT']   ?? getenv('DB_PORT')   ?: '3306';
- 
-            if ($user === null || $pass === null) {
-                // Em produção nunca exponha detalhes — logue internamente
+
+            $host   = $_ENV['DB_HOST'] ?? getenv('DB_HOST') ?: 'localhost';
+            $port   = $_ENV['DB_PORT'] ?? getenv('DB_PORT') ?: '3306';
+            $dbname = $_ENV['DB_NAME'] ?? getenv('DB_NAME') ?: 'dbouvidoria';
+            $user   = array_key_exists('DB_USER', $_ENV) ? $_ENV['DB_USER'] : (getenv('DB_USER') ?: null);
+            $pass   = array_key_exists('DB_PASS', $_ENV) ? $_ENV['DB_PASS'] : (getenv('DB_PASS') ?: '');
+
+            if ($user === null) {
                 error_log('[Ouvidoria] Credenciais do banco não configuradas. Defina DB_USER e DB_PASS no arquivo .env');
                 http_response_code(500);
                 die(json_encode(['error' => 'Erro interno de configuração.']));
             }
- 
+
             $dsn = "mysql:host=$host;port=$port;dbname=$dbname;charset=utf8mb4";
- 
+
             self::$instance = new PDO($dsn, $user, $pass, [
                 PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                 PDO::ATTR_EMULATE_PREPARES   => false,
             ]);
         }
- 
+
         return self::$instance;
     }
- 
+
     private function __construct() {}
     private function __clone() {}
 }
