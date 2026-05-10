@@ -41,6 +41,12 @@
           <li class="nav-item"><a class="nav-link" href="#manifestacao"><i class="fa-solid fa-pen-nib me-1"></i>Manifestacao</a></li>
           <li class="nav-item"><a class="nav-link" href="#consulta"><i class="fa-solid fa-magnifying-glass me-1"></i>Consultar</a></li>
           <li class="nav-item"><a class="nav-link" href="#faq"><i class="fa-solid fa-circle-question me-1"></i>FAQ</a></li>
+          <!-- Botão logout — visível só quando logado (via JS) -->
+          <li class="nav-item ms-lg-2 d-none" id="navLogoutItem">
+            <button class="btn btn-outline-danger btn-sm" id="btnLogout" title="Encerrar sessão">
+              <i class="fa-solid fa-right-from-bracket me-1"></i>Sair
+            </button>
+          </li>
           <li class="nav-item ms-lg-3">
             <a class="btn btn-nav-cta" href="#manifestacao"><i class="fa-solid fa-bullhorn me-2"></i>Registrar Agora</a>
           </li>
@@ -428,5 +434,21 @@
   <script src="assets/js/form.js"></script>
   <script src="assets/js/ajax.js"></script>
   <script src="assets/js/main.js"></script>
+  <script>
+    // ── Logout ────────────────────────────────────────────────
+    document.getElementById('btnLogout').addEventListener('click', async () => {
+      try {
+        await fetch('api/logout.php', { method: 'POST' });
+      } finally {
+        window.location.href = 'login.html';
+      }
+    });
+
+    // Mostra o botão de logout assim que a sessão for confirmada
+    // O form.js já chama api/session.php — escutamos o resultado via evento customizado
+    document.addEventListener('sessaoConfirmada', () => {
+      document.getElementById('navLogoutItem').classList.remove('d-none');
+    });
+  </script>
 </body>
 </html>

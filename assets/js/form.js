@@ -87,6 +87,9 @@ const Form = (() => {
           <div class="step1-user-badge">
             <i class="fa-solid fa-circle-check me-1"></i>Logado
           </div>
+          <button type="button" class="btn btn-link btn-sm text-danger p-0 ms-2" id="btnLogoutCard" title="Sair">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </button>
         </div>
 
         <!-- Dois botões de escolha -->
@@ -105,6 +108,16 @@ const Form = (() => {
         </div>
 
       </div>`);
+
+    // Notifica o navbar que o usuário está logado → exibe botão Sair
+    document.dispatchEvent(new Event('sessaoConfirmada'));
+
+    // Botão sair no card
+    $('#btnLogoutCard').on('click', async () => {
+      try { await fetch('api/logout.php', { method: 'POST' }); } finally {
+        window.location.href = 'login.html';
+      }
+    });
 
     // Botão identificado → vai para step 2 vinculado
     $('#btn-continuar-identificado').on('click', () => {
@@ -478,13 +491,7 @@ const Form = (() => {
   }
 
   /* ── API pública ────────────────────────────────────────────── */
-  /* ── Expõe os File objects reais para o ajax.js fazer o upload ──*/
-  function getUploadedFiles() {
-    return uploadedFiles.slice();
-  }
-
-  /* ── API pública ────────────────────────────────────────────── */
-  return { init, getFormData, getUploadedFiles, goToSuccess };
+  return { init, getFormData, goToSuccess };
 
 })();
 
