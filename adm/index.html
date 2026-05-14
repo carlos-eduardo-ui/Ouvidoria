@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel — Ouvidoria Escolar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <style>
+    :root {
+      --ce-green-deep: #00532E; --ce-green: #007A42; --ce-green-light: #00C262;
+      --ce-gold: #F5B800; --ce-gold-pale: #FFF8D6;
+      --ce-dark: #0D2417; --ce-gray-100: #F0F4F1; --ce-gray-500: #7A9183;
+      --sidebar-w: 240px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: #F4F7F5; color: #1a2e22; display: flex; min-height: 100vh; }
+
+    /* ── Sidebar ─────────────────────────────────────────── */
+    .sidebar {
+      width: var(--sidebar-w); background: var(--ce-dark);
+      color: #fff; display: flex; flex-direction: column;
+      position: fixed; top: 0; left: 0; height: 100vh; z-index: 100;
+      padding: 1.5rem 0;
+    }
+    .sidebar-brand {
+      display: flex; align-items: center; gap: 10px;
+      padding: 0 1.25rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .sidebar-brand-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: var(--ce-green); display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    .sidebar-brand-text { font-family: 'Fraunces', serif; font-size: 15px; font-weight: 700; line-height: 1.2; }
+    .sidebar-brand-sub  { font-size: 10px; opacity: .5; font-weight: 400; font-family: 'DM Sans', sans-serif; }
+    .sidebar-nav { flex: 1; padding: 1.25rem 0; }
+    .nav-section { font-size: 10px; font-weight: 600; letter-spacing: .08em; opacity: .4;
+      text-transform: uppercase; padding: .25rem 1.25rem .5rem; }
+    .nav-link-adm {
+      display: flex; align-items: center; gap: 10px;
+      padding: .55rem 1.25rem; color: rgba(255,255,255,.65);
+      font-size: 13.5px; font-weight: 500; border-radius: 0;
+      transition: all .2s; cursor: pointer; text-decoration: none;
+      border-left: 3px solid transparent;
+    }
+    .nav-link-adm:hover { color: #fff; background: rgba(255,255,255,.06); }
+    .nav-link-adm.active { color: #fff; background: rgba(0,194,98,.12); border-left-color: var(--ce-green-light); }
+    .nav-link-adm .nav-icon { width: 18px; text-align: center; font-size: 13px; }
+    .sidebar-footer { padding: 1rem 1.25rem; border-top: 1px solid rgba(255,255,255,.08); }
+    .admin-pill {
+      display: flex; align-items: center; gap: 9px;
+      padding: .6rem .75rem; background: rgba(255,255,255,.06);
+      border-radius: 10px; margin-bottom: .75rem;
+    }
+    .admin-avatar {
+      width: 32px; height: 32px; border-radius: 50%; background: var(--ce-green);
+      display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0;
+    }
+    .admin-name { font-size: 12.5px; font-weight: 600; line-height: 1.2; }
+    .admin-role { font-size: 10px; opacity: .5; }
+    .btn-logout-sidebar {
+      width: 100%; background: rgba(192,57,43,.15); border: 1px solid rgba(192,57,43,.3);
+      color: #f09090; border-radius: 8px; padding: .45rem; font-size: 12.5px;
+      cursor: pointer; transition: .2s; display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .btn-logout-sidebar:hover { background: rgba(192,57,43,.3); }
+
+    /* ── Main ────────────────────────────────────────────── */
+    .main-content { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; }
+    .topbar {
+      background: #fff; border-bottom: 1px solid #e2ece6;
+      padding: .85rem 1.75rem; display: flex; align-items: center;
+      justify-content: space-between; position: sticky; top: 0; z-index: 50;
+    }
+    .topbar-title { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 700; color: var(--ce-dark); }
+    .topbar-sub { font-size: 12px; color: var(--ce-gray-500); margin-top: 1px; }
+    .page-body { padding: 1.5rem 1.75rem; flex: 1; }
+
+    /* ── Cards de estatísticas ───────────────────────────── */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+    .stat-card {
+      background: #fff; border-radius: 14px; padding: 1.1rem 1.25rem;
+      border: 1px solid #e2ece6; position: relative; overflow: hidden;
+    }
+    .stat-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: var(--card-color, var(--ce-green));
+    }
+    .stat-label { font-size: 11.5px; color: var(--ce-gray-500); font-weight: 500; margin-bottom: .3rem; text-transform: uppercase; letter-spacing: .04em; }
+    .stat-value { font-size: 28px; font-weight: 700; color: var(--ce-dark); line-height: 1; }
+    .stat-icon  { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); font-size: 28px; opacity: .08; }
+    .stat-sub   { font-size: 11px; color: var(--ce-gray-500); margin-top: .35rem; }
+
+    /* ── Seção de gráficos ───────────────────────────────── */
+    .charts-row { display: grid; grid-template-columns: 1fr 300px; gap: 1rem; margin-bottom: 1.5rem; }
+    .chart-card { background: #fff; border-radius: 14px; padding: 1.25rem; border: 1px solid #e2ece6; }
+    .chart-title { font-size: 13.5px; font-weight: 600; margin-bottom: 1rem; color: var(--ce-dark); }
+
+    /* ── Tabela ──────────────────────────────────────────── */
+    .table-card { background: #fff; border-radius: 14px; border: 1px solid #e2ece6; overflow: hidden; }
+    .table-header {
+      padding: 1rem 1.25rem; border-bottom: 1px solid #e2ece6;
+      display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+    }
+    .table-header-title { font-size: 13.5px; font-weight: 600; color: var(--ce-dark); flex: 1; }
+    .filter-group { display: flex; gap: .5rem; align-items: center; }
+    .filter-select {
+      font-size: 12.5px; padding: .35rem .65rem; border: 1px solid #dde8e1;
+      border-radius: 8px; background: #fff; color: var(--ce-dark); cursor: pointer;
+    }
+    .search-input {
+      font-size: 12.5px; padding: .35rem .75rem; border: 1px solid #dde8e1;
+      border-radius: 8px; width: 200px; outline: none;
+    }
+    .search-input:focus { border-color: var(--ce-green); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead tr { background: #f8faf9; }
+    th { padding: .7rem 1rem; text-align: left; font-size: 11px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: .05em; color: var(--ce-gray-500);
+      border-bottom: 1px solid #e2ece6; white-space: nowrap; }
+    td { padding: .75rem 1rem; border-bottom: 1px solid #f0f4f1; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f8faf9; cursor: pointer; }
+    .proto { font-family: monospace; font-size: 12px; font-weight: 600; color: var(--ce-green-deep); }
+    .resumo { color: #4a6355; max-width: 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* ── Badges de status ────────────────────────────────── */
+    .badge-status {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 600; white-space: nowrap;
+    }
+    .badge-Aberta      { background: #FEF3CD; color: #8a6000; }
+    .badge-Em.análise  { background: #D1ECF1; color: #0c6275; }
+    .badge-Respondida  { background: #D4EDDA; color: #155724; }
+    .badge-Encerrada   { background: #E2E3E5; color: #383d41; }
+
+    /* ── Paginação ───────────────────────────────────────── */
+    .pag-row { display: flex; align-items: center; justify-content: space-between;
+      padding: .85rem 1.25rem; border-top: 1px solid #e2ece6; font-size: 12.5px; }
+    .pag-info { color: var(--ce-gray-500); }
+    .pag-btns { display: flex; gap: .35rem; }
+    .pag-btn {
+      width: 30px; height: 30px; border-radius: 7px; border: 1px solid #dde8e1;
+      background: #fff; color: var(--ce-dark); font-size: 12px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; transition: .15s;
+    }
+    .pag-btn:hover:not(:disabled) { background: var(--ce-green); color: #fff; border-color: var(--ce-green); }
+    .pag-btn:disabled { opacity: .35; cursor: default; }
+    .pag-btn.active { background: var(--ce-green); color: #fff; border-color: var(--ce-green); }
+
+    /* ── Loading ─────────────────────────────────────────── */
+    .skeleton { background: linear-gradient(90deg, #f0f4f1 25%, #e2ece6 50%, #f0f4f1 75%);
+      background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 6px; }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+    .empty-state { text-align: center; padding: 3rem; color: var(--ce-gray-500); }
+    .empty-state i { font-size: 2.5rem; opacity: .3; margin-bottom: .75rem; }
+  </style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══════════════════════════════════════════════ -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="sidebar-brand-icon"><i class="fa-solid fa-bullhorn"></i></div>
+    <div>
+      <div class="sidebar-brand-text">Ouvidoria</div>
+      <div class="sidebar-brand-sub">Painel do Grêmio</div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section">Menu</div>
+    <a class="nav-link-adm active" href="index.html">
+      <span class="nav-icon"><i class="fa-solid fa-gauge"></i></span> Dashboard
+    </a>
+    <a class="nav-link-adm" href="index.html#manifestacoes" onclick="scrollToTable()">
+      <span class="nav-icon"><i class="fa-solid fa-inbox"></i></span> Manifestações
+      <span class="ms-auto badge bg-warning text-dark" id="sidebarContAberta" style="font-size:10px"></span>
+    </a>
+    <div class="nav-section mt-3">Sistema</div>
+    <a class="nav-link-adm" href="../index.html" target="_blank">
+      <span class="nav-icon"><i class="fa-solid fa-globe"></i></span> Ver site público
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="admin-pill">
+      <div class="admin-avatar"><i class="fa-solid fa-user fa-xs"></i></div>
+      <div>
+        <div class="admin-name" id="sidebarNome">Carregando...</div>
+        <div class="admin-role">Membro do Grêmio</div>
+      </div>
+    </div>
+    <button class="btn-logout-sidebar" onclick="logout()">
+      <i class="fa-solid fa-right-from-bracket fa-xs"></i> Sair do painel
+    </button>
+  </div>
+</aside>
+
+<!-- ══ MAIN ════════════════════════════════════════════════ -->
+<div class="main-content">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">Dashboard</div>
+      <div class="topbar-sub" id="dataHoje"></div>
+    </div>
+    <button class="btn btn-sm btn-outline-success" onclick="carregarTudo()">
+      <i class="fa-solid fa-rotate-right me-1"></i>Atualizar
+    </button>
+  </div>
+
+  <div class="page-body">
+
+    <!-- Cards de estatísticas -->
+    <div class="stats-grid">
+      <div class="stat-card" style="--card-color:#F5B800">
+        <div class="stat-label">Total recebidas</div>
+        <div class="stat-value" id="statTotal">—</div>
+        <div class="stat-sub">todas as manifestações</div>
+        <i class="fa-solid fa-inbox stat-icon"></i>
+      </div>
+      <div class="stat-card" style="--card-color:#E74C3C">
+        <div class="stat-label">Abertas</div>
+        <div class="stat-value" id="statAbertas">—</div>
+        <div class="stat-sub">aguardando atendimento</div>
+        <i class="fa-solid fa-circle-exclamation stat-icon"></i>
+      </div>
+      <div class="stat-card" style="--card-color:#3498DB">
+        <div class="stat-label">Em análise</div>
+        <div class="stat-value" id="statAnalise">—</div>
+        <div class="stat-sub">sendo processadas</div>
+        <i class="fa-solid fa-magnifying-glass stat-icon"></i>
+      </div>
+      <div class="stat-card" style="--card-color:#00C262">
+        <div class="stat-label">Taxa de resolução</div>
+        <div class="stat-value" id="statTaxa">—</div>
+        <div class="stat-sub" id="statMediaDias">média de resposta</div>
+        <i class="fa-solid fa-chart-line stat-icon"></i>
+      </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title">Manifestações nos últimos 30 dias</div>
+        <canvas id="chartLinha" height="100"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Por tipo</div>
+        <canvas id="chartTipo" height="200"></canvas>
+      </div>
+    </div>
+
+    <!-- Tabela de manifestações -->
+    <div class="table-card" id="manifestacoes">
+      <div class="table-header">
+        <span class="table-header-title">Manifestações</span>
+        <div class="filter-group">
+          <input class="search-input" id="filtroBusca" placeholder="🔍  Buscar protocolo..." oninput="debounceCarregar()" />
+          <select class="filter-select" id="filtroStatus" onchange="carregarManifestacoes()">
+            <option value="">Todos os status</option>
+            <option value="Aberta">Aberta</option>
+            <option value="Em análise">Em análise</option>
+            <option value="Respondida">Respondida</option>
+            <option value="Encerrada">Encerrada</option>
+          </select>
+          <select class="filter-select" id="filtroSetor" onchange="carregarManifestacoes()">
+            <option value="">Todos os setores</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="tableWrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Protocolo</th>
+              <th>Tipo</th>
+              <th>Setor</th>
+              <th>Autor</th>
+              <th>Resumo</th>
+              <th>Status</th>
+              <th>Data</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr><td colspan="7" class="empty-state">
+              <div><i class="fa-solid fa-spinner fa-spin d-block mb-2"></i>Carregando...</div>
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pag-row">
+        <span class="pag-info" id="pagInfo">—</span>
+        <div class="pag-btns" id="pagBtns"></div>
+      </div>
+    </div>
+
+  </div><!-- /page-body -->
+</div><!-- /main-content -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  let paginaAtual = 1;
+  let _debTimer   = null;
+  let chartLinha  = null;
+  let chartTipo   = null;
+
+  // ── Data no topbar ────────────────────────────────────────
+  document.getElementById('dataHoje').textContent =
+    new Date().toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+  // ── Ao carregar ───────────────────────────────────────────
+  window.addEventListener('DOMContentLoaded', async () => {
+    // Verifica sessão ANTES de qualquer coisa
+    // Envia Accept: application/json para session_check.php retornar 401 (não redirecionar)
+    const sessao = await fetch('../api/adm/me.php', {
+      headers: { 'Accept': 'application/json' }
+    }).catch(() => null);
+
+    if (!sessao || sessao.status === 401) {
+      window.location.href = 'login.html';
+      return;
+    }
+
+    carregarTudo();
+    carregarSetoresFiltro();
+  });
+
+  async function carregarTudo() {
+    await Promise.all([carregarStats(), carregarManifestacoes()]);
+  }
+
+  // ── Stats + gráficos ──────────────────────────────────────
+  async function carregarStats() {
+    try {
+      const res  = await fetch('../api/adm/stats.php', { headers: { 'Accept': 'application/json' } });
+      if (res.status === 401) { window.location.href = 'login.html'; return; }
+      const data = await res.json();
+      if (!data.success) return;
+
+      document.getElementById('sidebarNome').textContent   = data.adm_nome ?? '—';
+      document.getElementById('statTotal').textContent     = data.total;
+      document.getElementById('statAbertas').textContent   = data.abertas;
+      document.getElementById('statAnalise').textContent   = data.em_analise;
+      document.getElementById('statTaxa').textContent      = data.taxa_resolucao + '%';
+      document.getElementById('statMediaDias').textContent = data.media_dias + ' dias em média';
+      document.getElementById('sidebarContAberta').textContent =
+        data.abertas > 0 ? data.abertas : '';
+
+      renderizarGraficos(data);
+    } catch(e) { console.error('Stats:', e); }
+  }
+
+  function renderizarGraficos(data) {
+    // Gráfico de linha — últimos 30 dias
+    const ctxL = document.getElementById('chartLinha').getContext('2d');
+    if (chartLinha) chartLinha.destroy();
+    chartLinha = new Chart(ctxL, {
+      type: 'line',
+      data: {
+        labels: data.ultimos_30_dias.map(d => {
+          const [,m,dia] = d.data.split('-');
+          return `${dia}/${m}`;
+        }),
+        datasets: [{
+          label: 'Manifestações',
+          data: data.ultimos_30_dias.map(d => d.total),
+          borderColor: '#007A42', backgroundColor: 'rgba(0,122,66,.08)',
+          tension: .4, fill: true, pointRadius: 3,
+        }]
+      },
+      options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+    });
+
+    // Gráfico de rosca — por tipo
+    const ctxT = document.getElementById('chartTipo').getContext('2d');
+    if (chartTipo) chartTipo.destroy();
+    chartTipo = new Chart(ctxT, {
+      type: 'doughnut',
+      data: {
+        labels: data.por_tipo.map(d => d.tipo),
+        datasets: [{
+          data: data.por_tipo.map(d => d.total),
+          backgroundColor: ['#007A42','#F5B800','#E74C3C','#3498DB','#9B59B6'],
+        }]
+      },
+      options: { plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } }, cutout: '65%' }
+    });
+  }
+
+  // ── Listagem ──────────────────────────────────────────────
+  async function carregarManifestacoes(pagina = 1) {
+    paginaAtual = pagina;
+    const status = document.getElementById('filtroStatus').value;
+    const setor  = document.getElementById('filtroSetor').value;
+    const busca  = document.getElementById('filtroBusca').value.trim();
+
+    const params = new URLSearchParams({ pagina, por_pag: 15 });
+    if (status) params.set('status', status);
+    if (setor)  params.set('setor',  setor);
+    if (busca)  params.set('busca',  busca);
+
+    document.getElementById('tableBody').innerHTML =
+      '<tr><td colspan="7" class="empty-state"><i class="fa-solid fa-spinner fa-spin d-block mb-2"></i>Carregando...</td></tr>';
+
+    try {
+      const res  = await fetch('../api/adm/manifestacoes.php?' + params, { headers: { 'Accept': 'application/json' } });
+      if (res.status === 401) { window.location.href = 'login.html'; return; }
+      const data = await res.json();
+      if (!data.success) return;
+
+      renderizarTabela(data.manifestacoes);
+      renderizarPaginacao(data.paginacao);
+    } catch(e) { console.error('Manifestações:', e); }
+  }
+
+  function renderizarTabela(lista) {
+    const tbody = document.getElementById('tableBody');
+    if (!lista.length) {
+      tbody.innerHTML = `<tr><td colspan="7" class="empty-state">
+        <i class="fa-solid fa-inbox d-block"></i>Nenhuma manifestação encontrada.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = lista.map(m => `
+      <tr onclick="abrirManifestacao(${m.IDmanifest})" title="Clique para abrir">
+        <td><span class="proto">${m.protocolo}</span></td>
+        <td>${m.tipo ?? '—'}</td>
+        <td>${m.setor ?? '—'}</td>
+        <td>${m.autor ?? 'Anônimo'}</td>
+        <td><span class="resumo">${m.resumo ?? ''}</span></td>
+        <td><span class="badge-status badge-${m.STATUS}">${m.STATUS}</span></td>
+        <td style="font-size:12px;color:#7A9183">${formatarData(m.criado_em)}</td>
+      </tr>`).join('');
+  }
+
+  function renderizarPaginacao(pag) {
+    document.getElementById('pagInfo').textContent =
+      `${pag.total} manifestação(ões) — página ${pag.pagina} de ${pag.total_pag || 1}`;
+
+    const cont = document.getElementById('pagBtns');
+    cont.innerHTML = '';
+
+    const criarBtn = (label, pagina, disabled, active) => {
+      const btn = document.createElement('button');
+      btn.className = 'pag-btn' + (active ? ' active' : '');
+      btn.innerHTML = label;
+      btn.disabled  = disabled;
+      if (!disabled) btn.onclick = () => carregarManifestacoes(pagina);
+      cont.appendChild(btn);
+    };
+
+    criarBtn('<i class="fa-solid fa-chevron-left fa-xs"></i>', pag.pagina - 1, pag.pagina <= 1, false);
+    for (let p = 1; p <= pag.total_pag; p++) {
+      if (pag.total_pag <= 7 || Math.abs(p - pag.pagina) < 3 || p === 1 || p === pag.total_pag) {
+        criarBtn(p, p, false, p === pag.pagina);
+      }
+    }
+    criarBtn('<i class="fa-solid fa-chevron-right fa-xs"></i>', pag.pagina + 1, pag.pagina >= pag.total_pag, false);
+  }
+
+  // ── Filtro de setores ─────────────────────────────────────
+  async function carregarSetoresFiltro() {
+    try {
+      const res  = await fetch('../api/setores.php');
+      const data = await res.json();
+      const sel  = document.getElementById('filtroSetor');
+      (data.setores ?? []).forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.IDsetor; opt.textContent = s.nome;
+        sel.appendChild(opt);
+      });
+    } catch(e) {}
+  }
+
+  // ── Navegar para detalhe ──────────────────────────────────
+  function abrirManifestacao(id) {
+    window.location.href = `manifestacao.html?id=${id}`;
+  }
+
+  function scrollToTable() {
+    document.getElementById('manifestacoes')?.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // ── Debounce para busca ───────────────────────────────────
+  function debounceCarregar() {
+    clearTimeout(_debTimer);
+    _debTimer = setTimeout(() => carregarManifestacoes(), 400);
+  }
+
+  // ── Logout ────────────────────────────────────────────────
+  async function logout() {
+    await fetch('../api/adm/logout.php', { method: 'POST' }).catch(() => {});
+    window.location.href = 'login.html';
+  }
+
+  // ── Helpers ───────────────────────────────────────────────
+  function formatarData(dt) {
+    if (!dt) return '—';
+    return new Date(dt).toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' });
+  }
+</script>
+</body>
+</html>
