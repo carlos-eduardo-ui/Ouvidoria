@@ -5,62 +5,9 @@
 
 const Utils = (() => {
 
-  /* ── Formatar CPF ───────────────────────── */
-  function formatCPF(value) {
-    return value
-      .replace(/\D/g, '')
-      .replace(/(\d{3})(\d)/, '$1.$2')
-      .replace(/(\d{3})(\d)/, '$1.$2')
-      .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-  }
-
   /* ── Validar CPF ────────────────────────── */
-  function validateCPF(cpf) {
-    cpf = cpf.replace(/\D/g, '');
-    if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
-    let sum = 0;
-    for (let i = 0; i < 9; i++) sum += parseInt(cpf[i]) * (10 - i);
-    let r = 11 - (sum % 11);
-    if (r >= 10) r = 0;
-    if (r !== parseInt(cpf[9])) return false;
-    sum = 0;
-    for (let i = 0; i < 10; i++) sum += parseInt(cpf[i]) * (11 - i);
-    r = 11 - (sum % 11);
-    if (r >= 10) r = 0;
-    return r === parseInt(cpf[10]);
-  }
-
-  /* ── Formatar Telefone ──────────────────── */
-  function formatPhone(value) {
-    return value
-      .replace(/\D/g, '')
-      .replace(/^(\d{2})(\d)/, '($1) $2')
-      .replace(/(\d{5})(\d{4})$/, '$1-$2');
-  }
 
   /* ── Validar E-mail ─────────────────────── */
-  function validateEmail(email) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  }
-
-  /* ── Gerar Protocolo aleatório ──────────── */
-  function generateProtocol() {
-    const year = new Date().getFullYear();
-    const rand = Math.floor(10000 + Math.random() * 89999);
-    return `OUV-${year}-${rand}`;
-  }
-
-  /* ── Formatar data pt-BR ────────────────── */
-  function formatDate(dateString) {
-    if (!dateString) return '—';
-    const [y, m, d] = dateString.split('-');
-    return `${d}/${m}/${y}`;
-  }
-
-  /* ── Data/hora atual ────────────────────── */
-  function nowBR() {
-    return new Date().toLocaleString('pt-BR', { timeZone: 'America/Fortaleza' });
-  }
 
   /* ── Truncar texto ──────────────────────── */
   function truncate(text, max = 80) {
@@ -121,6 +68,6 @@ const Utils = (() => {
   }
 
   /* ── Public API ─────────────────────────── */
-  return { formatCPF, validateCPF, formatPhone, validateEmail, generateProtocol, formatDate, nowBR, truncate, animateCounter, showToast, debounce, sanitize };
+  return { truncate, animateCounter, showToast, debounce, sanitize };
 
 })();

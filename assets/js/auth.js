@@ -449,24 +449,9 @@ const Auth = (() => {
   function _isValidEmail(email) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
   }
-  function _isValidCPF(cpf) {
-    cpf = cpf.replace(/\D/g,'');
-    if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
-    let s=0; for(let i=0;i<9;i++) s+=+cpf[i]*(10-i);
-    let r=11-(s%11); if(r>=10) r=0;
-    if(r!==+cpf[9]) return false;
-    s=0; for(let i=0;i<10;i++) s+=+cpf[i]*(11-i);
-    r=11-(s%11); if(r>=10) r=0;
-    return r===+cpf[10];
-  }
-  function _calcAge(dateStr) {
-    const dob = new Date(dateStr);
-    const diff = Date.now() - dob.getTime();
-    return Math.abs(new Date(diff).getUTCFullYear() - 1970);
-  }
-  function _maskCPF(v) {
-    return v.replace(/\D/g,'').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2');
-  }
+
+
+
   function _maskPhone(v) {
     return v.replace(/\D/g,'').replace(/^(\d{2})(\d)/,'($1) $2').replace(/(\d{5})(\d{4})$/,'$1-$2');
   }
