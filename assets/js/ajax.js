@@ -47,9 +47,15 @@ $(document).ready(() => {
     })
     .done(res => {
       if (res.success && res.protocolo) {
-        // Passo 2: se houver arquivos, envia para api/upload.php
-        const arquivos = Form.getUploadedFiles();
+        // Verifica se getUploadedFiles existe (guard contra TypeError)
+        const arquivos = typeof Form.getUploadedFiles === 'function'
+          ? Form.getUploadedFiles()
+          : [];
+
         if (arquivos.length > 0) {
+          // Passo 2: envia arquivos para api/upload.php
+          // .finally() garante que goToSuccess() SEMPRE é chamado,
+          // mesmo que o upload falhe ou timeout
           _enviarArquivos(res.IDmanifest, arquivos)
             .finally(() => {
               Utils.showToast('Manifestação enviada com sucesso!', 'success');
@@ -60,7 +66,6 @@ $(document).ready(() => {
           Form.goToSuccess(res.protocolo);
         }
       } else {
-        // Backend retornou success=false com mensagem
         Utils.showToast(res.message || 'Erro ao registrar. Tente novamente.', 'error');
       }
     })
@@ -133,20 +138,40 @@ $(document).ready(() => {
     formData.append('IDmanifest', IDmanifest);
     arquivos.forEach(file => formData.append('arquivos[]', file));
 
+    // AbortController: cancela o upload se demorar mais de 30s
+    // evita que a Promise fique pendente indefinidamente
+    const controller = new AbortController();
+    const timeoutId  = setTimeout(() => controller.abort(), 30000);
+
     try {
-      const res  = await fetch('api/upload.php', { method: 'POST', body: formData });
+      const res  = await fetch('api/upload.php', {
+        method: 'POST',
+        body:   formData,
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      // Verifica se a resposta é JSON antes de parsear
+      const contentType = res.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        throw new Error('Resposta inesperada do servidor (não é JSON)');
+      }
+
       const data = await res.json();
 
       if (data.erros && data.erros.length > 0) {
-        // Avisa sobre arquivos que não puderam ser salvos
         Utils.showToast(
           data.erros.length + ' arquivo(s) não puderam ser enviados.',
           'warning'
         );
       }
     } catch (err) {
-      // Upload falhou, mas a manifestação já foi registrada — avisa sem bloquear
-      Utils.showToast('Manifestação registrada, mas os anexos falharam.', 'warning');
+      clearTimeout(timeoutId);
+      const msg = err.name === 'AbortError'
+        ? 'Upload cancelado por timeout. A manifestação foi registrada.'
+        : 'Manifestação registrada, mas os anexos falharam.';
+      Utils.showToast(msg, 'warning');
       console.warn('[upload] Erro:', err);
     }
   }

@@ -32,6 +32,7 @@ const Form = (() => {
   ─────────────────────────────────────────────────────────────────*/
   function init() {
     _loadSetores();
+    _loadTipos();
     _checkSession();
     _bindStepNavigation();
     _bindCharCounter();
@@ -196,6 +197,31 @@ const Form = (() => {
       });
     })
     .fail(() => _setorError());
+  }
+
+  function _loadTipos() {
+    $.ajax({
+      url:      'api/tipos.php',
+      method:   'GET',
+      dataType: 'json',
+      timeout:  8000,
+    })
+    .done(res => {
+      if (!res.success || !res.tipos.length) { _tipoError(); return; }
+      const $select = $('#tipo');
+      $select.empty().append('<option value="">Selecione o tipo...</option>');
+      res.tipos.forEach(t => {
+        $select.append($('<option>', { value: t.IDtipo, text: t.descricao }));
+      });
+    })
+    .fail(() => _tipoError());
+  }
+
+  function _tipoError() {
+    $('#tipo').empty()
+      .append('<option value="">Erro ao carregar tipos</option>')
+      .prop('disabled', true);
+    Utils.showToast('Não foi possível carregar os tipos. Recarregue a página.', 'error');
   }
 
   function _setorError() {
@@ -491,7 +517,15 @@ const Form = (() => {
   }
 
   /* ── API pública ────────────────────────────────────────────── */
-  return { init, getFormData, goToSuccess };
+  /* Expõe os File objects reais para o ajax.js fazer o upload.
+     BUG FIX: sem esse export, Form.getUploadedFiles() retorna
+     undefined no ajax.js e o TypeError silencioso do jQuery
+     impede goToSuccess() de ser chamado. */
+  function getUploadedFiles() {
+    return uploadedFiles.slice();
+  }
+
+  return { init, getFormData, getUploadedFiles, goToSuccess };
 
 })();
 
