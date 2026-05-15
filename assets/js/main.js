@@ -102,8 +102,7 @@ $(document).ready(() => {
 
   /* ── Log environment info (dev only) ── */
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    console.log('%c[Ouvidoria] Dev mode — API calls are mocked.', 'color:#c9a84c;font-weight:bold');
-    console.log('%cPara usar a API real, edite assets/js/ajax.js e descomente os blocos de produção.', 'color:#888');
+    console.log('%c[Ouvidoria] Ambiente de desenvolvimento — usando API real em localhost.', 'color:#4caf50;font-weight:bold');
   }
 
 });
